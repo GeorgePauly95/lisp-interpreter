@@ -1,22 +1,31 @@
-def tokenizer(command):
-    return command.replace("(", " ( ").replace(")", " ) ").split()
+def tokenize(command):
+    tokens = command.replace("(", " ( ").replace(")", " ) ").split(" ")
+    return [token for token in tokens if token != " " and token != ""]
+
 
 def read_from_tokens(tokens):
     if len(tokens) == 0:
-        raise SyntaxError("Enter a valid expression")
+        return "Enter a valid expression"
+    AST = []
+    if len(tokens) == 1:
+        return atom(tokens[0])
+    elif tokens[0] == "(":
+        return read_from_tokens(tokens[1:])
     token = tokens.pop(0)
-    if token == "(":
-        L = []
-        while tokens[0] != ")":
-            L.append(read_from_tokens(tokens))
-        tokens.pop(0)
-        return L
-    elif token == ")":
-        raise SyntaxError("No opening parens to close")
-    else:
-        return token
+    while token != ")":
+        if token == "(":
+            AST.append(read_from_tokens(tokens))
+        else:
+            AST.append(atom(token))
+        token = tokens.pop(0)
+    return AST
 
 
-    
-
-    
+def atom(token):
+    try:
+        return int(token)
+    except ValueError:
+        try:
+            return float(token)
+        except ValueError:
+            return str(token)
