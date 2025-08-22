@@ -8,22 +8,23 @@ def tokenize(command):
 
 def read_from_tokens(tokens):
     if len(tokens) == 0:
-        return "Enter a valid expression"
-    AST = []
+        return None
     if len(tokens) == 1:
         return atomize(tokens[0])
-    # elif tokens[0] == "(":
-    #     return read_from_tokens(tokens[1:])
-    token = tokens.pop(0)
-    while token != ")":
-        if token == "(":
-            print(f"output is: {AST}")
-            AST.append(read_from_tokens(tokens))
-        else:
-            AST.append(atomize(token))
-        print(f"tokens are: {tokens}")
-        token = tokens.pop(0)
-    return AST
+    if tokens[0] == "(":
+        AST = []
+        tokens.pop(0)
+        while tokens[0] != ")":
+            if tokens[0] == "(":
+                inner = read_from_tokens(tokens)
+                AST.append(inner)
+                tokens.pop(0)
+            else:
+                AST.append(atomize(tokens[0]))
+                tokens.pop(0)
+        return AST
+    else:
+        return None
 
 
 def atomize(token):
@@ -50,7 +51,8 @@ operations = {
 
 
 def evaluate(AST, vars={}):
-    print(f"{AST}")
+    if AST is None:
+        return "Invalid Input"
     if type(AST) is not list:
         if type(AST) is int or type(AST) is float:
             return AST
@@ -83,14 +85,16 @@ def evaluate(AST, vars={}):
             return evaluate(consequent)
         return evaluate(alternate)
     # define
+
     if AST[0] == "define":
         if len(AST) != 3:
             return "Invalid Input"
         if AST[1] is not list:
             vars[AST[1]] = AST[2]
             return
-    if AST[0] not in operations:
-        return "Invalid Input"
+    if type(AST) is not list:
+        if AST[0] not in operations:
+            return "Invalid Input"
     # lambda
     if AST[0][0] == "lambda":
         arguments = AST[0][1]
