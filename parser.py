@@ -44,10 +44,13 @@ operations = {
     "<": less_than,
 }
 
+special_forms = {"if": "if", "define": "define", "lambda": "lambda"}
+
 
 def evaluate(AST, vars={}):
     if AST is None:
         return "Invalid Input"
+
     if type(AST) is not list:
         if type(AST) is int or type(AST) is float:
             return AST
@@ -56,6 +59,7 @@ def evaluate(AST, vars={}):
         elif AST in operations:
             return operations[AST]
         return "Invalid Input"
+
     if len(AST) == 1:
         if AST[0] == "+":
             return 0
@@ -64,42 +68,65 @@ def evaluate(AST, vars={}):
         elif AST[0] == ">" or AST[0] == "<":
             return True
         return "Invalid Input"
+
+    operation, operands = AST[0], AST[1:]
+
     # special forms
+
     # if
-    if AST[0] == "if":
-        operands = AST[1:]
-        if len(operands) != 3:
-            return "Invalid Input"
-        predicate, consequent, alternate = operands[0], operands[1], operands[2]
-        if evaluate(predicate) is True:
-            return evaluate(consequent)
-        return evaluate(alternate)
+    if operation == "if":
+        # operands = AST[1:]
+        if len(operands) == 2:
+            predicate, consequent = operands[0], operands[1]
+            if evaluate(predicate) is True:
+                return evaluate(consequent)
+            return
+
+        elif len(operands) == 3:
+            predicate, consequent, alternate = operands[0], operands[1], operands[2]
+            if evaluate(predicate) is True:
+                return evaluate(consequent)
+            return evaluate(alternate)
+
+        return "Ill formed special form"
+
     # define
-    # variables and values  can be expressions, need not be primitive
-    elif AST[0] == "define":
+
+    elif operation == "define":
         if len(AST) != 3:
             return "Invalid Input"
         if AST[1] is not list:
             vars[AST[1]] = AST[2]
             return
+
     # lambda
-    # accumulate test cases
-    # pytest
-    if type(AST[0]) is list:
+
+    if type(operation) is list:
         # lambda with evaluation
-        if AST[0][0] == "lambda":
-            arguments = AST[0][1]
+        if operation[0] == "lambda":
+            arguments = operation[1]
             arguments_values = AST[1:]
             if len(arguments) != len(arguments_values):
                 return "Wrong number of arguments passed to procedure"
             n = len(arguments)
             for i in range(n):
                 vars[arguments[i]] = arguments_values[i]
-            vars["lambda"] = AST[0][-1]
+            vars["lambda"] = operation[-1]
             return evaluate(vars["lambda"])
-    # General
-    operation, operands = operations[AST[0]], AST[1:]
-    return operation(
+
+    if type(operation) is not list:
+        return operations[operation](
+            *[
+                evaluate(operand)
+                if type(operand) is list
+                else vars[operand]
+                if operand in vars
+                else operand
+                for operand in operands
+            ]
+        )
+
+    return evaluate(operation)(
         *[
             evaluate(operand)
             if type(operand) is list
