@@ -1,4 +1,5 @@
 from operations import add, sub, mul, truerdiv, less_than, great_than
+from base_cases import base_cases_checker
 
 
 def tokenize(command):
@@ -48,32 +49,10 @@ special_forms = {"if": "if", "define": "define", "lambda": "lambda"}
 
 
 def evaluate(AST, vars={}):
-    if AST is None:
-        return "Invalid Input"
-
-    if type(AST) is not list:
-        if type(AST) is int or type(AST) is float:
-            return AST
-        elif AST in vars:
-            return vars[AST]
-        elif AST in operations:
-            return operations[AST]
-        return "Invalid Input"
-
-    if len(AST) == 1:
-        if AST[0] == "+":
-            return 0
-        elif AST[0] == "*":
-            return 1
-        elif AST[0] == ">" or AST[0] == "<":
-            return True
-        return "Invalid Input"
-
+    if base_cases_checker(AST, vars) is not None:
+        return base_cases_checker(AST, vars)
     operation, operands = AST[0], AST[1:]
 
-    # special forms
-
-    # if
     if operation == "if":
         # operands = AST[1:]
         if len(operands) == 2:
@@ -81,28 +60,28 @@ def evaluate(AST, vars={}):
             if evaluate(predicate) is True:
                 return evaluate(consequent)
             return
-
         elif len(operands) == 3:
             predicate, consequent, alternate = operands[0], operands[1], operands[2]
             if evaluate(predicate) is True:
                 return evaluate(consequent)
             return evaluate(alternate)
-
         return "Ill formed special form"
-
-    # define
 
     elif operation == "define":
         if len(AST) != 3:
             return "Invalid Input"
-        if AST[1] is not list:
-            vars[AST[1]] = AST[2]
+        name = AST[1]
+        body = AST[2]
+        if type(name) is not list:
+            vars[name] = evaluate(body)
             return
-
-    # lambda
+        name = AST[1][0]
+        arguments = AST[1][1:]
+        vars[name] = body
+        print(f"{vars}")
+        return
 
     if type(operation) is list:
-        # lambda with evaluation
         if operation[0] == "lambda":
             arguments = operation[1]
             arguments_values = AST[1:]
@@ -115,16 +94,21 @@ def evaluate(AST, vars={}):
             return evaluate(vars["lambda"])
 
     if type(operation) is not list:
-        return operations[operation](
-            *[
-                evaluate(operand)
-                if type(operand) is list
-                else vars[operand]
-                if operand in vars
-                else operand
-                for operand in operands
-            ]
-        )
+        if operation in operations:
+            return operations[operation](
+                *[
+                    evaluate(operand)
+                    if type(operand) is list
+                    else vars[operand]
+                    if operand in vars
+                    else operand
+                    for operand in operands
+                ]
+            )
+        elif operation in vars:
+            print(f"{operation}")
+            print(f"{vars[operation]}")
+            print(f"{evaluate(vars[operation])}")
 
     return evaluate(operation)(
         *[

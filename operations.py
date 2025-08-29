@@ -5,7 +5,7 @@ def add(*operands):
             result += operand
         return result
     except TypeError:
-        return "Invalid Input"
+        return "add Invalid Input"
 
 
 def sub(*operands):
@@ -17,7 +17,7 @@ def sub(*operands):
             result -= operand
         return result
     except TypeError:
-        return "Invalid Input"
+        return "sub Invalid Input"
 
 
 def mul(*operands):
@@ -27,10 +27,11 @@ def mul(*operands):
             result *= operand
         return result
     except TypeError:
-        return "Invalid Input"
+        return "mul Invalid Input"
 
 
 def truerdiv(*operands):
+    print(operands)
     try:
         if len(operands) == 1:
             return 1 / operands[0]
@@ -39,7 +40,7 @@ def truerdiv(*operands):
             result /= operand
         return result
     except TypeError:
-        return "Invalid Input"
+        return "div Invalid Input"
 
 
 def great_than(*operands):
