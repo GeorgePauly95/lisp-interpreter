@@ -39,16 +39,7 @@ def atomize(token):
 
 
 # SPECIAL FORMS
-
 # LAMBDA
-# (lambda (x y) (* x y))
-# ((lambda (x y) (* x y)) 3 4)
-
-
-# This function should do three things:
-# 1. returns a function
-# 2. points to outer scope
-# 3. binds parameters to arguments
 def lambda_special_form(operands, outer_env):
     parameters, body = operands[0], operands[1]
 
@@ -67,17 +58,13 @@ def lambda_special_form_v2(operands, outer_env):
         inner_env = create_env(parameters, arguments, outer_env)
         remaining_body, function_body = body[:-1], body[-1]
         for expression in remaining_body:
-            evaluate(expression, outer_env)
+            evaluate(expression, inner_env)
         return evaluate(function_body, inner_env)
 
     return lambda_func
 
 
 # DEFINE
-
-
-# (define square (lambda (x) (* x x)))
-# (define <variable> <expression>)
 def define_special_form(operands, env):
     var_name, expression = operands[0], operands[1]
     evaluated_expression = evaluate(expression, env)
@@ -86,8 +73,6 @@ def define_special_form(operands, env):
 
 
 # IF
-# (if <predicate> <consequent> <alternate>)
-# (if <predicate> <consequent>)
 def if_special_form(operands, env):
     number_of_operands = len(operands)
     if number_of_operands < 2:
@@ -105,8 +90,8 @@ def if_special_form(operands, env):
 # SET
 def set_special_form(operands, env):
     variable, expression = operands[0], operands[1]
+    evaluated_expression = evaluate(expression, env)
     variable_env = find_env(variable, env)
-    evaluated_expression = evaluate(expression, variable_env)
     if variable_env is None:
         return f"{variable}: Unbound variable"
     set_variable(variable, evaluated_expression, variable_env)
@@ -124,7 +109,12 @@ def begin_special_form(operands, env):
     return evaluated_expression
 
 
-# END OF SPECIAL FORMS
+# QUOTE
+def quote_special_form(operands, env):
+    if len(operands) != 1:
+        return "Ill formed special form"
+    expression = operands[0]
+    return expression
 
 
 # EVALUATOR HELPER FUNCTIONS
@@ -138,27 +128,12 @@ def get_operands(AST):
     return operands
 
 
-# change AST to expression
-def check_base_cases(expression, env):
-    if expression is None:
-        return "Invalid Input"
-    expression_type = type(expression)
-    if expression_type is not list:
-        if expression_type is int or expression_type is float:
-            return expression
-        return get_variable(expression, env)
-    return None
-
-
-# ((lambda (x y) (* x y)) 3 4)
-
-
 ### MAIN EVALUATER FUNCTION
 def evaluate(AST, env):
-    base_case = check_base_cases(AST, env)
-
-    if base_case is not None:
-        return base_case
+    if isinstance(AST, str):
+        return get_variable(AST, env)
+    elif not isinstance(AST, list):
+        return AST
 
     operater, operands = get_operater(AST), get_operands(AST)
     # check for special forms using a function
@@ -177,11 +152,18 @@ def evaluate(AST, env):
     elif operater == "begin":
         return begin_special_form(operands, env)
 
+    elif operater == "quote":
+        return quote_special_form(operands, env)
+
     evaluated_operater = evaluate(operater, env)
 
     if evaluated_operater is not None:
-        # need to fix the return value when one of the operands or even the operater are unbound.
-        evaluated_operands = [evaluate(operand, env) for operand in operands]
+        evaluated_operands = []
+        for operand in operands:
+            evaluated_operand = evaluate(operand, env)
+            if evaluated_operand is None:
+                return f"{operand}: Unbound variable"
+            evaluated_operands.append(evaluated_operand)
         return evaluated_operater(*evaluated_operands)
     return None
 

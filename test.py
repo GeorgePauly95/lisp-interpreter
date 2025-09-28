@@ -3,9 +3,9 @@ from parser import lisp_interpreter
 tests = [
     # lambda test cases:
     "((lambda (x) (* x x)) 3)",
-    # "(lambda (x) (lambda (y) (* y x)))",
-    # "((lambda (x) (lambda (y) (* y x))) 23)",
-    # "(((lambda (x) (lambda (y) (* y x))) 23) 3)",
+    "(lambda (x) (lambda (y) (* y x)))",
+    "((lambda (x) (lambda (y) (* y x))) 23)",
+    "(((lambda (x) (lambda (y) (* y x))) 23) 3)",
     # 'begin' test cases:
     "(begin (define sum +) (sum 1 2))",
     # # 'define' test cases:
@@ -20,8 +20,8 @@ tests = [
     "(define x (* 1 (+ 1 1)))",
     "(* x x)",
     # # 4
-    "(define (square x) (* x x))",
-    "(square (* 3 3))",
+    # "(define (square x) (* x x))",
+    # "(square (* 3 3))",
     # 5
     "(define square (lambda (y) (* y y)))",
     "(square 2)",
@@ -35,14 +35,15 @@ tests = [
     "((if (> 3 2) + -) 8 9)",
     # # scoping
     # # 1
-    "(define outer-var 100)",
-    "(define (test-scope inner-var) (+ outer-var inner-var))",
-    "(test-scope 23)",
+    # "(define outer-var 100)",
+    # "(define (test-scope inner-var) (+ outer-var inner-var))",
+    # "(test-scope 23)",
     # # 2
-    "(define shadowed 10)",
-    "(define (shadow-test shadowed) shadowed)",
-    "(shadow-test 99)",
-    "shadowed",
+    # define syntactic sugar
+    # "(define shadowed 10)",
+    # "(define (shadow-test shadowed) shadowed)",
+    # "(shadow-test 99)",
+    # "shadowed",
 ]
 for test in tests:
     print(f"Input: {test}")

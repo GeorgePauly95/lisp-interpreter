@@ -1,11 +1,9 @@
 def add(*operands):
     try:
-        result = operands[0]
-        for operand in operands[1:]:
+        result = 0
+        for operand in operands:
             result += operand
         return result
-    except IndexError:
-        return 0
     except TypeError:
         return "add Invalid Input"
 
@@ -26,12 +24,10 @@ def sub(*operands):
 
 def mul(*operands):
     try:
-        result = operands[0]
-        for operand in operands[1:]:
+        result = 1
+        for operand in operands:
             result *= operand
         return result
-    except IndexError:
-        return 1
     except TypeError:
         return "mul Invalid Input"
 
@@ -48,8 +44,8 @@ def truerdiv(*operands):
         return "Wrong number of arguments passed to procedure"
     except TypeError:
         return "div Invalid Input"
-    except ZeroDivisionError:
-        return "Cannot divide by zero"
+    # except Exception as e:
+    #     return e
 
 
 def great_than(*operands):

@@ -11,12 +11,12 @@ global_env = {
 }
 
 
-def get_variable(expression, env):
+def get_variable(name, env):
     if env is None:
         return None
-    elif expression in env:
-        return env[expression]
-    return get_variable(expression, env[("outer",)])
+    elif name in env:
+        return env[name]
+    return get_variable(name, env[("outer",)])
 
 
 def set_variable(name, value, env):
@@ -30,9 +30,9 @@ def create_env(names, values, outer_env):
     return inner_env
 
 
-def find_env(expression, env):
+def find_env(name, env):
     if env is None:
         return None
-    elif expression in env:
+    elif name in env:
         return env
-    return find_env(expression, env[("outer",)])
+    return find_env(name, env[("outer",)])
