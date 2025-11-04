@@ -1,4 +1,4 @@
-from operations import add, sub, mul, truerdiv, less_than, great_than
+from operations import add, sub, mul, truerdiv, less_than, great_than, equal_to, display, modulo
 
 global_env = {
     "+": add,
@@ -7,6 +7,9 @@ global_env = {
     "/": truerdiv,
     ">": great_than,
     "<": less_than,
+    "=": equal_to,
+    "modulo": modulo,
+    "display": display,
     ("outer",): None,
 }
 

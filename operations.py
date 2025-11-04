@@ -68,3 +68,27 @@ def less_than(*operands):
         if first_oprd > oprd:
             return False
     return result
+
+
+def equal_to(*operands):
+    if len(operands) <= 1:
+        return True
+    first_oprd, rem_oprds = operands[0], operands[1:]
+    result = True
+    for oprd in rem_oprds:
+        if first_oprd != oprd:
+            return False
+    return result
+
+def display(*operands):
+    if len(operands) == 1:
+        print(operands[0])
+        return
+    else:
+        return "Wrong number of arguments passed to procedure"
+
+def modulo(*operands):
+    if len(operands) == 2:
+        return operands[0]%operands[1]
+    else:
+        return "Wrong number of arguments passed to procedure"
