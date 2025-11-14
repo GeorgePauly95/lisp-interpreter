@@ -15,16 +15,22 @@ def read_from_tokens(tokens):
         return atomize(tokens[0])
     if tokens[0] == "(":
         AST = []
-        tokens.pop(0)
+        _ = tokens.pop(0)
         while tokens[0] != ")":
             if tokens[0] == "(":
                 AST.append(read_from_tokens(tokens))
             else:
                 AST.append(atomize(tokens[0]))
-            tokens.pop(0)
+            _ = tokens.pop(0)
         return AST
     else:
         return None
+
+
+def analyze(AST):
+    operator, *operands = AST
+    if operator == "defmacro":
+        return "stores params and body in macro dict"
 
 
 # EVALUATE TOKENS IF INT/FLOAT (SHOULD THIS BE A PART OF EVALUATOR AND NOT RFT?)
@@ -41,16 +47,6 @@ def atomize(token):
 # SPECIAL FORMS
 # LAMBDA
 def lambda_special_form(operands, outer_env):
-    parameters, body = operands[0], operands[1]
-
-    def lambda_func(*arguments):
-        inner_env = create_env(parameters, arguments, outer_env)
-        return evaluate(body, inner_env)
-
-    return lambda_func
-
-
-def lambda_special_form_v2(operands, outer_env):
     parameters, body = operands[0], operands[1:]
 
     # take care of the case where there are no parameters
@@ -110,11 +106,37 @@ def begin_special_form(operands, env):
 
 
 # QUOTE
-def quote_special_form(operands, env):
+
+
+def quote_special_form_list(expression, env, depth):
+    def unquote(expression):
+        return evaluate(expression, env)
+
+    operator, *operands = expression
+    if operator == "unquote" and depth == 1:
+        if len(operands) > 1:
+            return "Ill formed special form"
+        return unquote(operands[0])
+    if operator == "unquote" and depth > 1:
+        depth -= 1
+    if operator == "quote":
+        depth += 1
+    return [
+        sub_expr
+        if type(sub_expr) is not list
+        else quote_special_form_list(sub_expr, env, depth)
+        for sub_expr in expression
+    ]
+
+
+def quote_special_form(operands, env, depth=1):
     if len(operands) != 1:
         return "Ill formed special form"
     expression = operands[0]
-    return expression
+    if type(expression) is not list:
+        return expression
+    else:
+        return quote_special_form_list(expression, env, depth)
 
 
 # EVALUATOR HELPER FUNCTIONS
@@ -144,7 +166,7 @@ def evaluate(AST, env):
         return define_special_form(operands, env)
 
     elif operater == "lambda":
-        return lambda_special_form_v2(operands, env)
+        return lambda_special_form(operands, env)
 
     elif operater == "set!":
         return set_special_form(operands, env)
@@ -165,7 +187,7 @@ def evaluate(AST, env):
                 return f"{operand}: Unbound variable"
             evaluated_operands.append(evaluated_operand)
         return evaluated_operater(*evaluated_operands)
-    return None
+    return "Error"
 
 
 def lisp_interpreter(input):
