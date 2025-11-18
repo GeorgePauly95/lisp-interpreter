@@ -23,6 +23,8 @@ global_env = {
     ("outer",): None,
 }
 
+macro_env = {}
+
 
 def get_variable(name, env):
     if env is None:

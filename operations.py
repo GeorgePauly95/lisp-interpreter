@@ -80,6 +80,7 @@ def equal_to(*operands):
             return False
     return result
 
+
 def display(*operands):
     if len(operands) == 1:
         print(operands[0])
@@ -87,8 +88,9 @@ def display(*operands):
     else:
         return "Wrong number of arguments passed to procedure"
 
+
 def modulo(*operands):
     if len(operands) == 2:
-        return operands[0]%operands[1]
+        return operands[0] % operands[1]
     else:
         return "Wrong number of arguments passed to procedure"

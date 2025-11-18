@@ -1,4 +1,4 @@
-from env import global_env, get_variable, set_variable, create_env, find_env
+from env import global_env, get_variable, set_variable, create_env, find_env, macro_env
 
 
 # TOKENIZE
@@ -27,10 +27,36 @@ def read_from_tokens(tokens):
         return None
 
 
+def get_operater(AST):
+    operater = AST[0]
+    return operater
+
+
+def get_operands(AST):
+    operands = AST[1:]
+    return operands
+
+
 def analyze(AST):
+    if type(AST) is not list:
+        return AST
+    if len(AST) == 0:
+        return AST
     operator, *operands = AST
     if operator == "defmacro":
-        return "stores params and body in macro dict"
+        macro_name, params, body = operands
+        macro_env[macro_name] = {"params": params, "body": body}
+        return None
+    if operator in macro_env:
+        params = macro_env[operator]["params"]
+        body = macro_env[operator]["body"]
+        if len(operands) != len(params):
+            return f"Improper number of operands for macro: {operator}"
+        env = dict(zip(params, operands))
+        env[("outer",)] = global_env
+        expanded = evaluate(body, env)
+        return analyze(expanded)
+    return [analyze(sub_expr) for sub_expr in AST]
 
 
 # EVALUATE TOKENS IF INT/FLOAT (SHOULD THIS BE A PART OF EVALUATOR AND NOT RFT?)
@@ -106,8 +132,6 @@ def begin_special_form(operands, env):
 
 
 # QUOTE
-
-
 def quote_special_form_list(expression, env, depth):
     def unquote(expression):
         return evaluate(expression, env)
@@ -137,17 +161,6 @@ def quote_special_form(operands, env, depth=1):
         return expression
     else:
         return quote_special_form_list(expression, env, depth)
-
-
-# EVALUATOR HELPER FUNCTIONS
-def get_operater(AST):
-    operater = AST[0]
-    return operater
-
-
-def get_operands(AST):
-    operands = AST[1:]
-    return operands
 
 
 ### MAIN EVALUATER FUNCTION
@@ -191,4 +204,4 @@ def evaluate(AST, env):
 
 
 def lisp_interpreter(input):
-    return evaluate(read_from_tokens(tokenize(input)), global_env)
+    return evaluate(analyze(read_from_tokens(tokenize(input))), global_env)
