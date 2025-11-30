@@ -44,8 +44,8 @@ def truerdiv(*operands):
         return "Wrong number of arguments passed to procedure"
     except TypeError:
         return "div Invalid Input"
-    # except Exception as e:
-    #     return e
+    except Exception as e:
+        return e
 
 
 def great_than(*operands):
