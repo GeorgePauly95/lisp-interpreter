@@ -84,3 +84,17 @@ def quote_eval(evaluate, operands, env, depth=1):
         return expression
     else:
         return quote_list_eval(evaluate, expression, env, depth)
+
+
+special_forms = {
+    "if": if_eval,
+    "define": define_eval,
+    "quote": quote_eval,
+    "set": set_eval,
+    "lambda": lambda_eval,
+    "begin": begin_eval,
+}
+
+
+def special_forms_finder(special_form):
+    return special_forms[special_form]

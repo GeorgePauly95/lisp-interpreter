@@ -1,12 +1,5 @@
+from special_forms import special_forms_finder, special_forms
 from env import get_variable
-from special_forms import (
-    if_eval,
-    define_eval,
-    lambda_eval,
-    set_eval,
-    begin_eval,
-    quote_eval,
-)
 
 
 def get_operater(AST):
@@ -26,23 +19,8 @@ def evaluate(AST, env):
         return AST
 
     operater, operands = get_operater(AST), get_operands(AST)
-    if operater == "if":
-        return if_eval(evaluate, operands, env)
-
-    elif operater == "define":
-        return define_eval(evaluate, operands, env)
-
-    elif operater == "lambda":
-        return lambda_eval(evaluate, operands, env)
-
-    elif operater == "set!":
-        return set_eval(evaluate, operands, env)
-
-    elif operater == "begin":
-        return begin_eval(evaluate, operands, env)
-
-    elif operater == "quote":
-        return quote_eval(evaluate, operands, env)
+    if operater in special_forms:
+        return special_forms_finder[special_forms](evaluate, operands, env)
 
     evaluated_operater = evaluate(operater, env)
 
@@ -54,4 +32,4 @@ def evaluate(AST, env):
                 return f"{operand}: Unbound variable"
             evaluated_operands.append(evaluated_operand)
         return evaluated_operater(*evaluated_operands)
-    return "Error"
+    return f"{operater}: Unbound operater"
