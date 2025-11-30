@@ -12,16 +12,20 @@ def read_from_tokens(tokens):
         return None
     if len(tokens) == 1:
         return atomize(tokens[0])
+
     if tokens[0] == "(":
-        AST = []
-        _ = tokens.pop(0)
-        while tokens[0] != ")":
-            if tokens[0] == "(":
-                AST.append(read_from_tokens(tokens))
-            else:
-                AST.append(atomize(tokens[0]))
+        try:
+            AST = []
             _ = tokens.pop(0)
-        return AST
+            while tokens[0] != ")":
+                if tokens[0] == "(":
+                    AST.append(read_from_tokens(tokens))
+                else:
+                    AST.append(atomize(tokens[0]))
+                _ = tokens.pop(0)
+            return AST
+        except Exception as e:
+            return e
     else:
         return None
 
@@ -31,8 +35,8 @@ def analyze(AST):
         return AST
     if len(AST) == 0:
         return AST
+
     operator, *operands = AST
-    print(f"AST: {AST}")
     if operator == "defmacro":
         macro_name, params, body = operands
         macro_env[macro_name] = {"params": params, "body": body}
